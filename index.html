@@ -1,0 +1,296 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typing Practice</title>
+
+<style>
+:root {
+    --page: #f7f7fc;
+    --ink: #202938;
+    --muted: #687384;
+    --prompt: #b8bfcb;
+    --line: #cbd4e7;
+    --accent: #3478d4;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--page);
+    color: var(--ink);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+main {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 22px 23px 32px;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+h1 {
+    margin: 0;
+    font-size: clamp(25px, 5vw, 38px);
+    line-height: 1.15;
+    font-weight: 750;
+    letter-spacing: -0.7px;
+}
+
+#counter {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: clamp(15px, 3.7vw, 25px);
+    white-space: nowrap;
+}
+
+#practice {
+    position: relative;
+    min-height: 72vh;
+    max-height: 78vh;
+    overflow-y: auto;
+    border: 2px solid var(--line);
+    border-radius: 24px;
+    background: #f8f9ff;
+    padding: 39px 38px;
+    box-shadow: inset 0 2px 4px rgba(45, 58, 90, 0.04);
+    cursor: text;
+}
+
+#text {
+    font-family: "Courier New", Courier, monospace;
+    font-size: clamp(23px, 5.2vw, 38px);
+    line-height: 1.78;
+    letter-spacing: 1px;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    word-break: normal;
+    color: var(--prompt);
+    pointer-events: none;
+}
+
+.typed {
+    color: #263447;
+}
+
+.wrong {
+    color: #d94b58;
+    text-decoration: underline;
+}
+
+#caret {
+    display: inline-block;
+    width: 0;
+    height: 1.08em;
+    vertical-align: -0.18em;
+    border-left: 3px solid var(--accent);
+    margin-left: -1px;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+/* Invisible input placed over the visible practice area */
+#input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 39px 38px;
+    margin: 0;
+    border: 0;
+    border-radius: inherit;
+    resize: none;
+    overflow: hidden;
+    background: transparent;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    caret-color: transparent;
+    opacity: 0.02;
+    z-index: 2;
+    font-family: "Courier New", Courier, monospace;
+    font-size: clamp(23px, 5.2vw, 38px);
+    line-height: 1.78;
+    letter-spacing: 1px;
+}
+
+.hint {
+    margin: 13px 4px 0;
+    color: #8790a0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+@media (max-width: 480px) {
+    main {
+        padding: 22px 23px 24px;
+    }
+
+    header {
+        margin-bottom: 32px;
+    }
+
+    #practice {
+        min-height: 72vh;
+        padding: 39px 38px;
+    }
+
+    #input {
+        padding: 39px 38px;
+    }
+
+    .hint {
+        font-size: 12px;
+    }
+}
+</style>
+</head>
+
+<body>
+<main>
+
+    <header>
+        <h1>Typing Practice</h1>
+        <div id="counter">0 / 1000 characters</div>
+    </header>
+
+    <section id="practice" aria-label="Typing practice area">
+        <div id="text"></div>
+
+        <textarea
+            id="input"
+            autocomplete="off"
+            autocapitalize="off"
+            autocorrect="off"
+            spellcheck="false"
+            aria-label="Type the practice text"
+        ></textarea>
+    </section>
+
+    <p class="hint">
+        Tap the text area and type the displayed words.
+        Use lowercase letters and spaces only.
+    </p>
+
+</main>
+
+<script>
+(() => {
+    const passage = (
+        "the small bird sings in the tree while the warm sun rises above the quiet village every day " +
+        "brings a new chance to learn and grow with patience and care we can solve hard problems and " +
+        "build useful skills a clear mind and steady hands help us make progress step by step reading " +
+        "writing and practice open doors to new ideas the world is full of things to explore from tiny " +
+        "seeds in the soil to bright stars in the sky we keep learning when we stay curious and try again "
+    ).repeat(4).slice(0, 1000);
+
+    const practice = document.getElementById("practice");
+    const text = document.getElementById("text");
+    const input = document.getElementById("input");
+    const counter = document.getElementById("counter");
+
+    let typed = "";
+
+    function render() {
+        text.replaceChildren();
+
+        for (let i = 0; i < passage.length; i++) {
+            if (i === typed.length) {
+                const caret = document.createElement("span");
+                caret.id = "caret";
+                caret.setAttribute("aria-hidden", "true");
+                text.appendChild(caret);
+            }
+
+            const character = document.createElement("span");
+            character.textContent = passage[i];
+
+            if (i < typed.length) {
+                if (typed[i] === passage[i]) {
+                    character.className = "typed";
+                } else {
+                    character.className = "wrong";
+                }
+            }
+
+            text.appendChild(character);
+        }
+
+        if (typed.length >= passage.length) {
+            const caret = document.createElement("span");
+            caret.id = "caret";
+            text.appendChild(caret);
+        }
+
+        counter.textContent =
+            `${typed.length} / 1000 characters`;
+
+        // Keep the current typing position visible.
+        const caret = document.getElementById("caret");
+
+        if (caret) {
+            const caretBox = caret.getBoundingClientRect();
+            const areaBox = practice.getBoundingClientRect();
+
+            if (
+                caretBox.bottom > areaBox.bottom - 24 ||
+                caretBox.top < areaBox.top + 12
+            ) {
+                caret.scrollIntoView({
+                    block: "nearest",
+                    inline: "nearest"
+                });
+            }
+        }
+    }
+
+    function focusInput() {
+        input.focus({ preventScroll: true });
+    }
+
+    practice.addEventListener("click", focusInput);
+
+    // Read actual input from the keyboard, including mobile keyboards.
+    input.addEventListener("input", () => {
+        const cleaned = input.value
+            .toLowerCase()
+            .replace(/[^a-z ]/g, "")
+            .slice(0, passage.length);
+
+        if (input.value !== cleaned) {
+            input.value = cleaned;
+        }
+
+        typed = cleaned;
+        render();
+    });
+
+    // Prevent Enter from inserting a new line.
+    input.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === "Tab") {
+            event.preventDefault();
+        }
+    });
+
+    render();
+})();
+</script>
+
+</body>
+</html>
